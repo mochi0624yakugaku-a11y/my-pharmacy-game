@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>高度薬学クイズシステム - ケアスタイル</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    /* ========================================== */
+    /* 全体の優しい世界観を設定（ベイマックス風カラー） */
+    /* ========================================== */
+    * {
+      box-sizing: border-box;
+      font-family: 'Hiragino Maru Gothic ProN', 'Yu Gothic UI', 'Meiryo', sans-serif;
+    }
+    body {
+      background-color: #f5f7f8; /* 優しいライトグレー */
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: #333333;
+    }
+    .main-container {
+      background-color: #ffffff;
+      width: 100%;
+      max-width: 580px;
+      padding: 30px;
+      border-radius: 24px;
+      box-shadow: 0 8px 24px rgba(140, 150, 160, 0.12);
+      border: 3px solid #eef2f5;
+      position: relative;
+    }
+    h1, h2 {
+      font-size: 22px;
+      color: #df4736; /* ベイマックスのアクセントレッド */
+      text-align: center;
+      margin-top: 0;
+      margin-bottom: 20px;
+      letter-spacing: 1px;
+    }
+    p {
+      text-align: center;
+      font-size: 14px;
+      color: #666666;
+      margin-bottom: 25px;
+    }
+
+    /* ========================================== */
+    /* 🤖 ベイマックス アニメーションエリア       */
+    /* ========================================== */
+    .character-box {
+      display: flex;
+      align-items: center;
+      margin-bottom: 25px;
+      gap: 15px;
+      background-color: #fff;
+      padding: 10px 5px;
+      border-radius: 16px;
+    }
+    .baymax {
+      width: 65px;
+      height: 55px;
+      background: #ffffff;
+      border: 2px solid #e2e8f0;
+      border-radius: 50% 50% 48% 48%;
+      position: relative;
+      flex-shrink: 0;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.04);
+      animation: floatBaymax 3.0s ease-in-out infinite;
+    }
+    .baymax-eyes {
+      position: absolute;
+      width: 7px;
+      height: 7px;
+      background: #222222;
+      border-radius: 50%;
+      top: 24px;
+      left: 16px;
+      box-shadow: 24px 0 0 #222222;
+    }
+    .baymax-eyes::after {
+      content: '';
+      position: absolute;
+      width: 25px;
+      height: 2px;
+      background: #222222;
+      top: 3px;
+      left: 3px;
+    }
+    .balloon {
+      position: relative;
+      background: #ffffff;
+      border: 2px solid #e2e8f0;
+      padding: 14px 18px;
+      border-radius: 16px;
+      font-size: 13px;
+      font-weight: bold;
+      color: #475569;
+      flex-grow: 1;
+      animation: floatBalloon 3.0s ease-in-out infinite;
+    }
+    .balloon::after {
+      content: '';
+      position: absolute;
+      left: -10px;
+      top: 20px;
+      border-width: 5px 10px 5px 0;
+      border-style: solid;
+      border-color: transparent #ffffff transparent transparent;
+      z-index: 2;
+    }
+    .balloon::before {
+      content: '';
+      position: absolute;
+      left: -13px;
+      top: 19px;
+      border-width: 6px 11px 6px 0;
+      border-style: solid;
+      border-color: transparent #e2e8f0 transparent transparent;
+      z-index: 1;
+    }
+
+    @keyframes floatBaymax {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+    @keyframes floatBalloon {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-2px); }
+    }
+
+    /* ========================================== */
+    /* 1. 目次画面用のスタイル（ピクトグラム付）   */
+    /* ========================================== */
+    .menu-list {
+      list-style: none;
+      padding: 0;
+      margin: 25px 0;
+    }
+    .menu-item {
+      margin-bottom: 15px;
+    }
+    .menu-btn {
+      width: 100%;
+      padding: 16px;
+      font-size: 16px;
+      font-weight: bold;
+      color: #334155;
+      background-color: #fff;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .menu-btn:hover {
+      background-color: #f8fafc;
+      border-color: #cbd5e1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(148, 163, 184, 0.08);
+    }
+    .menu-btn.review-btn {
+      border: 2px dashed #eab308;
+      background-color: #fffbeb;
+    }
+    .menu-btn.review-btn:hover {
+      background-color: #fef3c7;
+      border-color: #d97706;
+    }
+    .btn-icon {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* ========================================== */
+    /* 2. クイズ画面用のスタイル                   */
+    /* ========================================== */
+    .quiz-sub-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      gap: 10px;
+    }
+    .quiz-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-grow: 1;
+    }
+    .stage-badge {
+      display: inline-block;
+      padding: 5px 14px;
+      background-color: #fee2e2;
+      color: #ef4444;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+    .progress-container {
+      background-color: #f1f5f9;
+      height: 10px;
+      border-radius: 5px;
+      overflow: hidden;
+      flex-grow: 1;
+    }
+    .progress-bar {
+      background-color: #0ea5e9;
+      height: 100%;
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+    .progress-text {
+      font-size: 13px;
+      font-weight: bold;
+      color: #64748b;
+      white-space: nowrap;
+    }
+    
+    .favorite-btn {
+      background: none;
+      border: none;
+      font-size: 26px;
+      cursor: pointer;
+      color: #cbd5e1;
+      transition: transform 0.2s, color 0.2s;
+      padding: 0 5px;
+      line-height: 1;
+    }
+    .favorite-btn:hover {
+      transform: scale(1.15);
+    }
+    .favorite-btn.active {
+      color: #eab308;
+      filter: drop-shadow(0 2px 4px rgba(234, 179, 8, 0.2));
+    }
+
+    .case-box {
+      font-size: 16px;
+      line-height: 1.7;
+      font-weight: bold;
+      margin-bottom: 25px;
+      color: #1e293b;
+      background-color: #fff;
+    }
+    .choices-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .choice-button {
+      background-color: #fff;
+      border: 2px solid #e2e8f0;
+      padding: 15px 20px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-size: 15px;
+      text-align: left;
+      font-weight: bold;
+      color: #334155;
+      transition: all 0.2s;
+    }
+    .choice-button:hover:not(:disabled) {
+      background-color: #f8fafc;
+      border-color: #cbd5e1;
+      transform: translateY(-2px);
+    }
+    .choice-button:disabled {
+      cursor: not-allowed;
+    }
+    
+    .choice-button.correct-flash {
+      background-color: #f0fdf4 !important;
+      border-color: #86efac !important;
+      color: #166534 !important;
+    }
+    .choice-button.wrong-flash {
+      background-color: #fef2f2 !important;
+      border-color: #fca5a5 !important;
+      color: #991b1b !important;
+    }
+
+    .feedback-box {
+      background-color: #f8fafc;
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 25px;
+      border-left: 5px solid #94a3b8;
+    }
+    .feedback-box.hidden {
+      display: none;
+    }
+    #result-status {
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    #evidence-text {
+      font-size: 14px;
+      line-height: 1.7;
+      color: #334155;
+    }
+
+    /* 下部ナビゲーションボタン */
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .nav-buttons {
+      display: flex;
+      gap: 12px;
+    }
+    .action-btn {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    .action-btn:active {
+      transform: scale(0.98);
+    }
+    .back-btn {
+      background-color: #94a3b8;
+      color: white;
+    }
+    .back-btn:hover {
+      background-color: #64748b;
+    }
+    .prev-button {
+      background-color: #e2e8f0;
+      color: #475569;
+    }
+    .prev-button:hover:not(:disabled) {
+      background-color: #cbd5e1;
+    }
+    .prev-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .next-button {
+      background-color: #df4736;
+      color: white;
+      box-shadow: 0 4px 12px rgba(223, 71, 54, 0.2);
+    }
+    .next-button:hover:not(:disabled) {
+      background-color: #c93b2b;
+    }
+    .next-button:disabled {
+      background-color: #fca5a5;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="main-container">
+  
+  <div class="character-box">
+    <div class="baymax">
+      <div class="baymax-eyes"></div>
+    </div>
+    <div id="bear-balloon" class="balloon">
+      こんにちは、私はベイマックス。あなたの健康学習パートナーです。どの領域のクイズに挑戦しますか？
+    </div>
+  </div>
+
+  <div id="menu-screen">
+    <h2>学習項目を選択してください</h2>
+    <p>解きたい疾患の領域を選択するとクイズが始まります。</p>
+    <ul class="menu-list">
+      <li class="menu-item">
+        <button class="menu-btn" onclick="startQuiz('hypertension.json')">
+          <span class="btn-icon">
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 12h20M2 7h20M2 17h20" stroke="#cbd5e1"/>
+              <path d="M3 12c4-4 8 4 12 0s4-4 6-2" stroke="#ef4444" stroke-width="2.5"/>
+            </svg>
+          </span>
+          ① 高血圧 （50問）
+        </button>
+      </li>
+      <li class="menu-item">
+        <button class="menu-btn" onclick="startQuiz('diabetes.json')">
+          <span class="btn-icon">
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 15c4-1 9-4 13-1s5 4 5 4-3 1-7-1-8 0-11-2z" fill="#fbcfe8" stroke="#ec4899"/>
+              <circle cx="15" cy="8" r="3" fill="#fde047" stroke="#eab308"/>
+              <path d="M12 8h3M15 8h3M12 6l3 2-3 2zM18 6l-3 2 3 2z" stroke="#eab308"/>
+            </svg>
+          </span>
+          ② 糖尿病 （50問）
+        </button>
+      </li>
+      <li class="menu-item">
+        <button class="menu-btn" onclick="startQuiz('heart_failure.json')">
+          <span class="btn-icon">
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="#fee2e2" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+            </svg>
+          </span>
+          ③ 心不全 （30問）
+        </button>
+      </li>
+      <li class="menu-item">
+        <button class="menu-btn" onclick="startQuiz('myeloma.json')">
+          <span class="btn-icon">
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="round" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 10.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Zm0 0c1.5 0 2.5.5 3.5 1.5h5c1-1 2-1.5 3.5-1.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" stroke="#94a3b8"/>
+              <path d="M18 13.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5Zm0 0c-1.5 0-2.5-.5-3.5-1.5h-5c-1 1-2 1.5-3.5 1.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5Z" stroke="#94a3b8"/>
+              <path d="M12 9l1 2 2-1-1 2 2 1-2 1 1 2-2-1-1 2 0-2-2 1 1-2-2-1 2-1-1-2z" fill="#f87171" stroke="#ef4444" stroke-width="1.5"/>
+            </svg>
+          </span>
+          ④ 多発性骨髄腫 （30問）
+        </button>
+      </li>
+      <!-- 🌟 追加：⑤ 皮膚感染症（100問）と腕・感染症のイラスト -->
+      <li class="menu-item">
+        <button class="menu-btn" onclick="startQuiz('skin_infections.json')">
+          <span class="btn-icon">
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <!-- 前腕から手元にかけた皮膚・腕のなめらかなライン -->
+              <path d="M2 17c4-1 7-3 11-3s6 2 9 3" stroke="#f4a261" stroke-width="2.5"/>
+              <path d="M2 20c5-1 8-2 12-2s5 1 8 2" stroke="#e9c46a" stroke-width="1.5"/>
+              <!-- 皮膚上の感染症（バイ菌・トゲトゲのウイルスマーク） -->
+              <circle cx="12" cy="9" r="2.5" fill="#e76f51" stroke="#yd7316" stroke-width="1"/>
+              <path d="M12 5.5v2M12 11v2M8.5 9h2M13.5 9h2M9.5 6.5l1.5 1.5M13 10l1.5 1.5M14.5 6.5L13 8M10.5 10L9 11.5" stroke="#ef4444" stroke-width="1.2"/>
+              <!-- 小さな菌の広がり -->
+              <circle cx="6" cy="11" r="1" fill="#ef4444"/>
+              <circle cx="17" cy="11" r="1" fill="#ef4444"/>
+            </svg>
+          </span>
+          ⑤ 皮膚感染症 （100問）
+        </button>
+      </li>
+      <li class="menu-item">
+        <button class="menu-btn review-btn" onclick="startReviewMode()">
+          <span class="btn-icon">
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="#fef08a" stroke="#eab308" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+          </span>
+          ⭐ お気に入り問題の復習（登録分のみ）
+        </button>
+      </li>
+    </ul>
+  </div>
+
+  <div id="quiz-screen" style="display: none;">
+    <div class="quiz-sub-header">
+      <div class="quiz-header-left">
+        <span id="stage-title" class="stage-badge">STAGE</span>
+        <div class="progress-container">
+          <div id="progress-bar" class="progress-bar"></div>
+        </div>
+        <div id="progress-text" class="progress-text">0 / 0</div>
+      </div>
+      <button id="favorite-toggle" class="favorite-btn" onclick="toggleFavorite()">★</button>
+    </div>
+
+    <div id="case-text" class="case-box">問題文がここに読み込まれます。</div>
+
+    <div id="choices-container" class="choices-grid"></div>
+
+    <div id="feedback-container" class="feedback-box hidden">
+      <div id="result-status"></div>
+      <div style="font-weight: bold; margin-bottom: 4px; color: #475569;">💡 ベイマックスの解説:</div>
+      <div id="evidence-text"></div>
+    </div>
+
+    <div class="button-group">
+      <div class="nav-buttons">
+        <button id="prev-btn" class="action-btn prev-button" onclick="prevQuestion()">⬅ 1つ前へ</button>
+        <button id="next-btn" class="action-btn next-button" onclick="nextQuestion()">次の問題へ ➔</button>
+      </div>
+      <button class="action-btn back-btn" onclick="showMenu()">目次画面に戻る</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let questions = [];
+  let currentQuestionIndex = 0;
+  let score = 0;
+  let isReviewMode = false;
+  let answeredStatus = [];
+
+  let favorites = JSON.parse(localStorage.getItem('med_quiz_favorites')) || {};
+
+  const menuScreen = document.getElementById('menu-screen');
+  const quizScreen = document.getElementById('quiz-screen');
+  const bearBalloon = document.getElementById('bear-balloon');
+  const stageTitle = document.getElementById('stage-title');
+  const progressText = document.getElementById('progress-text');
+  const progressBar = document.getElementById('progress-bar');
+  const caseText = document.getElementById('case-text');
+  const choicesContainer = document.getElementById('choices-container');
+  const feedbackContainer = document.getElementById('feedback-container');
+  const resultStatus = document.getElementById('result-status');
+  const evidenceText = document.getElementById('evidence-text');
+  const prevBtn = document.getElementById('prev-btn');
+  const nextBtn = document.getElementById('next-btn');
+  const favToggle = document.getElementById('favorite-toggle');
+
+  function showMenu() {
+    quizScreen.style.display = 'none';
+    menuScreen.style.display = 'block';
+    bearBalloon.textContent = "こんにちは、私はベイマックス。あなたの健康学習パートナーです。どの領域のクイズに挑戦しますか？";
+  }
+
+  async function startQuiz(jsonFileName) {
+    try {
+      const response = await fetch(jsonFileName);
+      if (!response.ok) {
+        throw new Error(`ファイルが見つかりません: ${jsonFileName}`);
+      }
+      const rawQuestions = await response.json();
+      
+      questions = rawQuestions.map((q, index) => {
+        q.id = `${jsonFileName}_${index}`;
+        return q;
+      });
+
+      isReviewMode = false;
+      initQuizStatus();
+    } catch (error) {
+      alert(`データの読み込みに失敗しました。\n${error.message}\n※ファイルが正しい場所に配置されているか確認してください。`);
+    }
+  }
+
+  function startReviewMode() {
+    const allFavIds = Object.keys(favorites).filter(key => favorites[key].isFav);
+    
+    if (allFavIds.length === 0) {
+      bearBalloon.textContent = "お気に入りに登録された問題が現在ありません。クイズ中に右上（★）を押して登録してください。";
+      return;
+    }
+
+    questions = allFavIds.map(key => favorites[key].data);
+    isReviewMode = true;
+    initQuizStatus();
+  }
+
+  function initQuizStatus() {
+    currentQuestionIndex = 0;
+    score = 0;
+    answeredStatus = new Array(questions.length).fill(null);
+    
+    menuScreen.style.display = 'none';
+    quizScreen.style.display = 'block';
+    loadQuestion();
+  }
+
+  function loadQuestion() {
+    feedbackContainer.classList.add('hidden');
+    choicesContainer.innerHTML = '';
+    
+    bearBalloon.textContent = isReviewMode 
+      ? "お気に入り問題の復習プロセスを実行中。最適な対応を選んでください。" 
+      : "この症例を分析しました。適切な対応を1つ選択してください。";
+
+    const currentQuestion = questions[currentQuestionIndex];
+    
+    prevBtn.disabled = (currentQuestionIndex === 0);
+    
+    if (favorites[currentQuestion.id] && favorites[currentQuestion.id].isFav) {
+      favToggle.classList.add('active');
+      favToggle.textContent = '★';
+    } else {
+      favToggle.classList.remove('active');
+      favToggle.textContent = '☆';
+    }
+
+    stageTitle.textContent = currentQuestion.stage || "実践問題";
+    progressText.textContent = `${currentQuestionIndex + 1} / ${questions.length}`;
+    const progressPercent = ((currentQuestionIndex + 1) / questions.length) * 100;
+    progressBar.style.width = `${progressPercent}%`;
+
+    caseText.textContent = currentQuestion.case;
+
+    currentQuestion.choices.forEach(choice => {
+      const button = document.createElement('button');
+      button.className = 'choice-button';
+      button.textContent = choice;
+      const choiceLetter = choice.trim().charAt(0);
+      
+      button.onclick = () => selectAnswer(choiceLetter, button);
+      choicesContainer.appendChild(button);
+    });
+
+    const previousAnswer = answeredStatus[currentQuestionIndex];
+    if (previousAnswer) {
+      restoreAnswer(previousAnswer);
+    } else {
+      nextBtn.disabled = true;
+    }
+  }
+
+  function selectAnswer(selectedLetter, selectedButton) {
+    const currentQuestion = questions[currentQuestionIndex];
+    const correctLetter = currentQuestion.correct;
+    const isCorrect = (selectedLetter === correctLetter);
+
+    answeredStatus[currentQuestionIndex] = {
+      selectedLetter: selectedLetter,
+      isCorrect: isCorrect
+    };
+
+    if (isCorrect) score++;
+    displayFeedback(isCorrect, selectedButton, correctLetter);
+  }
+
+  function displayFeedback(isCorrect, selectedButton, correctLetter) {
+    const buttons = choicesContainer.querySelectorAll('.choice-button');
+    buttons.forEach(btn => {
+      btn.disabled = true;
+      const btnLetter = btn.textContent.trim().charAt(0);
+      if (btnLetter === correctLetter) {
+        btn.classList.add('correct-flash');
+      }
+    });
+
+    if (isCorrect) {
+      bearBalloon.textContent = "痛みのレベルが下がりました。素晴らしい、大正解です。";
+      resultStatus.innerHTML = '<span style="color: #166534; font-size: 1.3em; font-weight: bold;">💮 正解 💮</span>';
+    } else {
+      if (selectedButton) selectedButton.classList.add('wrong-flash');
+      bearBalloon.textContent = "データが更新されました。解説を確認して、次に活かしましょう。";
+      resultStatus.innerHTML = '<span style="color: #991b1b; font-size: 1.3em; font-weight: bold;">◆ 不正解 ◆</span>';
+    }
+
+    evidenceText.textContent = questions[currentQuestionIndex].evidence;
+    feedbackContainer.classList.remove('hidden');
+    nextBtn.disabled = false;
+  }
+
+  function restoreAnswer(ans) {
+    const currentQuestion = questions[currentQuestionIndex];
+    let selectedBtn = null;
+
+    const buttons = choicesContainer.querySelectorAll('.choice-button');
+    buttons.forEach(btn => {
+      const btnLetter = btn.textContent.trim().charAt(0);
+      if (btnLetter === ans.selectedLetter) {
+        selectedBtn = btn;
+      }
+    });
+
+    displayFeedback(ans.isCorrect, selectedBtn, currentQuestion.correct);
+  }
+
+  function prevQuestion() {
+    if (currentQuestionIndex > 0) {
+      const currentAns = answeredStatus[currentQuestionIndex];
+      if (currentAns && currentAns.isCorrect) {
+        score--;
+      }
+      currentQuestionIndex--;
+      loadQuestion();
+    }
+  }
+
+  function nextQuestion() {
+    currentQuestionIndex++;
+    if (currentQuestionIndex < questions.length) {
+      loadQuestion();
+    } else {
+      bearBalloon.textContent = "すべてのクイズが完了しました。私はケアに満足しました。🍵";
+      caseText.innerHTML = `
+        <div style="text-align: center; padding: 10px 0;">
+          <h3 style="color: #1e293b; margin-bottom: 10px;">すべての問題が終了しました！</h3>
+          <p style="font-size: 18px; color: #df4736; font-weight: bold;">あなたのスコア: ${score} / ${questions.length} 問中</p>
+        </div>
+      `;
+      choicesContainer.innerHTML = '';
+      feedbackContainer.classList.add('hidden');
+      nextBtn.disabled = true;
+      prevBtn.disabled = true;
+    }
+  }
+
+  function toggleFavorite() {
+    const currentQuestion = questions[currentQuestionIndex];
+    const id = currentQuestion.id;
+
+    if (favorites[id] && favorites[id].isFav) {
+      favorites[id].isFav = false;
+      favToggle.classList.remove('active');
+      favToggle.textContent = '☆';
+      bearBalloon.textContent = "この問題をお気に入りから削除しました。";
+    } else {
+      favorites[id] = {
+        isFav: true,
+        data: currentQuestion
+      };
+      favToggle.classList.add('active');
+      favToggle.textContent = '★';
+      bearBalloon.textContent = "この問題をお気に入りに登録しました。復習モードでいつでも解き直せます。";
+    }
+
+    localStorage.setItem('med_quiz_favorites', JSON.stringify(favorites));
+  }
+</script>
+</body>
+</html>
