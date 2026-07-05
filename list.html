@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>前立腺肥大症（BPH）高度臨床クイズ - 問題一覧・検索</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2rem;
+            border-bottom: 3px solid var(--accent-color);
+            padding-bottom: 10px;
+        }
+
+        /* 検索・カウンターエリア */
+        .search-box {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 280px;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent-color);
+            outline: none;
+        }
+
+        .match-count {
+            font-weight: bold;
+            color: var(--primary-color);
+            font-size: 16px;
+        }
+
+        /* リストスタイル */
+        .quiz-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .quiz-item {
+            background: var(--card-bg);
+            border-left: 5px solid var(--primary-color);
+            border-radius: 4px 8px 8px 4px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .quiz-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+        }
+
+        /* 併用禁忌や重要問題のカラー強調用クラス */
+        .quiz-item.highlight-kinqi {
+            border-left-color: #e74c3c;
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .quiz-stage {
+            font-weight: bold;
+            background: #e1f5fe;
+            color: #0288d1;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .quiz-correct {
+            font-weight: bold;
+            color: #27ae60;
+            background: #e8f8f5;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .quiz-case {
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+
+        /* アコーディオン（詳細展開） */
+        .details-btn {
+            background: none;
+            border: none;
+            color: var(--accent-color);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .details-btn:hover {
+            text-decoration: underline;
+        }
+
+        .quiz-details {
+            display: none;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed #ddd;
+            background: #fafafa;
+            padding: 15px;
+            border-radius: 6px;
+        }
+
+        .quiz-details.show {
+            display: block;
+        }
+
+        .choices-title, .evidence-title {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .choice-line {
+            margin-bottom: 6px;
+            font-size: 14px;
+            padding-left: 10px;
+        }
+
+        .choice-line.is-correct {
+            color: #27ae60;
+            font-weight: bold;
+            background: #edfcf5;
+        }
+
+        .evidence-text {
+            font-size: 14px;
+            line-height: 1.5;
+            color: #555;
+            background: #fff;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #eee;
+        }
+
+        /* 該当なし表示 */
+        .no-result {
+            text-align: center;
+            padding: 40px;
+            background: #fff;
+            border-radius: 8px;
+            color: #777;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📋 BPH 高度臨床クイズ 問題検索システム</h1>
+
+    <div class="search-box">
+        <input type="text" id="searchInput" class="search-input" placeholder="問題番号、薬剤名（タムスロシン、タダラフィルなど）、病態（尿閉、緑内障）で検索...">
+        <div class="match-count">該当件数: <span id="matchCount">0</span> / 100 問</div>
+    </div>
+
+    <div id="quizList" class="quiz-list">
+        <p style="text-align: center;">データを読み込み中...</p>
+    </div>
+</div>
+
+<script>
+    let quizData = [];
+
+    // bph.jsonの読み込み
+    fetch('bph.json')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('bph.json の読み込みに失敗しました。ファイル名やパスを確認してください。');
+            }
+            return response.json();
+        })
+        .then(data => {
+            quizData = data;
+            renderList(quizData);
+        })
+        .catch(error => {
+            document.getElementById('quizList').innerHTML = `<p style="color:red; text-align:center;">${error.message}</p>`;
+        });
+
+    // リスト描画関数
+    function renderList(items) {
+        const listContainer = document.getElementById('quizList');
+        const countSpan = document.getElementById('matchCount');
+        
+        countSpan.textContent = items.length;
+        listContainer.innerHTML = '';
+
+        if (items.length === 0) {
+            listContainer.innerHTML = '<div class="no-result">キーワードに一致する問題が見つかりません。</div>';
+            return;
+        }
+
+        items.forEach((item, index) => {
+            const isKinqi = item.case.includes('禁忌') || item.case.includes('尿閉') || item.case.includes('ショック');
+            
+            const itemDiv = document.createElement('div');
+            itemDiv.className = `quiz-item ${isKinqi ? 'highlight-kinqi' : ''}`;
+
+            // 選択肢のHTML組み立て
+            let choicesHtml = '';
+            item.choices.forEach(choice => {
+                const choiceLetter = choice.charAt(0); // 'A', 'B', 'C', 'D'
+                const isCorrectChoice = choiceLetter === item.correct;
+                choicesHtml += `<div class="choice-line ${isCorrectChoice ? 'is-correct' : ''}">${choice}</div>`;
+            });
+
+            itemDiv.innerHTML = `
+                <div class="quiz-header">
+                    <span class="quiz-stage">${item.stage}</span>
+                    <span class="quiz-correct">正解: ${item.correct}</span>
+                </div>
+                <div class="quiz-case">${item.case}</div>
+                <button class="details-btn" onclick="toggleDetails(this)">
+                    <span>▼ 選択肢とエビデンスを表示</span>
+                </button>
+                <div class="quiz-details">
+                    <p class="choices-title">【選択肢】</p>
+                    <div>${choicesHtml}</div>
+                    <p class="evidence-title" style="margin-top:15px;">【薬学的エビデンス・解説】</p>
+                    <div class="evidence-text">${item.evidence}</div>
+                </div>
+            `;
+            listContainer.appendChild(itemDiv);
+        });
+    }
+
+    // アコーディオンの開閉機能
+    function toggleDetails(btn) {
+        const details = btn.nextElementSibling;
+        const span = btn.querySelector('span');
+        if (details.classList.contains('show')) {
+            details.classList.remove('show');
+            span.textContent = '▼ 選択肢とエビデンスを表示';
+        } else {
+            details.classList.add('show');
+            span.textContent = '▲ 詳細を閉じる';
+        }
+    }
+
+    // 検索フィルタリング（爆速リアルタイム検索）
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+        const keyword = e.target.value.toLowerCase().trim();
+        
+        if (!keyword) {
+            renderList(quizData);
+            return;
+        }
+
+        const filtered = quizData.filter(item => {
+            return item.stage.toLowerCase().includes(keyword) || 
+                   item.case.toLowerCase().includes(keyword) || 
+                   item.evidence.toLowerCase().includes(keyword) ||
+                   item.choices.some(c => c.toLowerCase().includes(keyword));
+        });
+
+        renderList(filtered);
+    });
+</script>
+
+</body>
+</html>

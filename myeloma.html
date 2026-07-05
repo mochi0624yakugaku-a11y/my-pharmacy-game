@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多発性骨髄腫（MM）DIクイズゲーム</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --background-color: #f5f7fa;
+            --card-background: #ffffff;
+            --text-color: #333333;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 10px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin: 0 0 10px 0;
+            font-size: 1.8rem;
+        }
+
+        .progress-bar {
+            background-color: #e0e0e0;
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .progress-fill {
+            background-color: var(--success-color);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .quiz-card {
+            background: var(--card-background);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .stage-title {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .case-text {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 25px;
+            white-space: pre-wrap;
+        }
+
+        .choices-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .choice-btn {
+            background-color: #fff;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 15px 20px;
+            font-size: 1rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+
+        .choice-btn:hover:not(:disabled) {
+            background-color: #f0f4f8;
+            border-color: var(--primary-color);
+        }
+
+        .choice-btn:disabled {
+            cursor: not-allowed;
+        }
+
+        .choice-btn.correct-choice {
+            background-color: #d4edda;
+            border-color: var(--success-color);
+            color: #155724;
+            font-weight: bold;
+        }
+
+        .choice-btn.wrong-choice {
+            background-color: #f8d7da;
+            border-color: var(--error-color);
+            color: #721c24;
+        }
+
+        .result-section {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .result-section.correct-panel {
+            background-color: #d4edda;
+            border-left: 5px solid var(--success-color);
+        }
+
+        .result-section.wrong-panel {
+            background-color: #f8d7da;
+            border-left: 5px solid var(--error-color);
+        }
+
+        .result-status {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .evidence-box {
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 15px;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+        }
+
+        .next-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            float: right;
+            font-weight: bold;
+        }
+
+        .next-btn:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .score-board {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .score-num {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 20px 0;
+        }
+
+        .restart-btn {
+            background-color: var(--success-color);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .restart-btn:hover {
+            background-color: #219653;
+        }
+
+        .clearfix::after {
+            content: "";
+            clear: both;
+            display: table;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>多発性骨髄腫（MM）DIマスタークイズ</h1>
+        <div id="quiz-info">問題 <span id="current-idx">1</span> / <span id="total-idx">30</span></div>
+    </header>
+
+    <div class="progress-bar">
+        <div id="progress-fill" class="progress-fill"></div>
+    </div>
+
+    <div id="game-area">
+        <div class="quiz-card">
+            <div id="stage-title" class="stage-title">ステージ</div>
+            <div id="case-text" class="case-text">症例テキストがここに表示されます。</div>
+            
+            <div id="choices-container" class="choices-grid">
+                </div>
+
+            <div id="result-panel" class="result-section">
+                <div id="result-status" class="result-status">正解！</div>
+                <div id="evidence-text" class="evidence-box">解説エビデンス</div>
+                <div class="clearfix">
+                    <button id="next-button" class="next-btn">次の問題へ ➔</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="score-area" style="display: none;" class="quiz-card score-board">
+        <h2>クイズ完了！お疲れ様でした。</h2>
+        <div class="score-num"><span id="correct-count">0</span> / <span id="final-total-count">30</span> 問正解</div>
+        <p id="score-comment"></p>
+        <button id="restart-button" class="restart-btn">もう一度挑戦する</button>
+    </div>
+</div>
+
+<script>
+    let questions = [];
+    let currentQuestionIndex = 0;
+    let score = 0;
+
+    // 要素の取得
+    const stageTitleEl = document.getElementById('stage-title');
+    const caseTextEl = document.getElementById('case-text');
+    const choicesContainer = document.getElementById('choices-container');
+    const resultPanel = document.getElementById('result-panel');
+    const resultStatus = document.getElementById('result-status');
+    const evidenceTextEl = document.getElementById('evidence-text');
+    const nextButton = document.getElementById('next-button');
+    const currentIdxEl = document.getElementById('current-idx');
+    const totalIdxEl = document.getElementById('total-idx');
+    const progressFill = document.getElementById('progress-fill');
+    
+    const gameArea = document.getElementById('game-area');
+    const scoreArea = document.getElementById('score-area');
+    const correctCountEl = document.getElementById('correct-count');
+    const finalTotalCountEl = document.getElementById('final-total-count');
+    const scoreCommentEl = document.getElementById('score-comment');
+    const restartButton = document.getElementById('restart-button');
+
+    // JSONデータの読み込み
+    async function loadQuestions() {
+        try {
+            const response = await fetch('questions.json');
+            if (!response.ok) {
+                throw new Error('questions.json の読み込みに失敗しました。');
+            }
+            questions = await response.json();
+            initGame();
+        } catch (error) {
+            caseTextEl.innerHTML = `<span style="color:red; font-weight:bold;">エラー: questions.json が見つからないか、中身が正しくありません。<br>${error.message}</span>`;
+            console.error(error);
+        }
+    }
+
+    // ゲームの初期化
+    function initGame() {
+        currentQuestionIndex = 0;
+        score = 0;
+        totalIdxEl.textContent = questions.length;
+        finalTotalCountEl.textContent = questions.length;
+        gameArea.style.display = 'block';
+        scoreArea.style.display = 'none';
+        showQuestion();
+    }
+
+    // 問題の表示
+    function showQuestion() {
+        resultPanel.style.display = 'none';
+        nextButton.style.disabled = true;
+        
+        currentIdxEl.textContent = currentQuestionIndex + 1;
+        const progressPercent = ((currentQuestionIndex) / questions.length) * 100;
+        progressFill.style.width = `${progressPercent}%`;
+
+        const q = questions[currentQuestionIndex];
+        stageTitleEl.textContent = q.stage;
+        caseTextEl.textContent = q.case;
+
+        // 選択肢ボタンの生成
+        choicesContainer.innerHTML = '';
+        q.choices.forEach(choice => {
+            const button = document.createElement('button');
+            button.className = 'choice-btn';
+            button.textContent = choice;
+            // 冒頭の「A:」「B:」などの文字をキーとして判定に使用
+            const choiceKey = choice.substring(0, 1).toUpperCase();
+            
+            button.addEventListener('click', () => selectAnswer(choiceKey, button));
+            choicesContainer.appendChild(button);
+        });
+    }
+
+    // 回答を選択した時の処理
+    function selectAnswer(selectedKey, selectedButton) {
+        const q = questions[currentQuestionIndex];
+        const buttons = choicesContainer.querySelectorAll('.choice-btn');
+        
+        // 全ボタンを無効化
+        buttons.forEach(btn => btn.disabled = true);
+
+        const isCorrect = (selectedKey === q.correct.toUpperCase());
+
+        if (isCorrect) {
+            score++;
+            selectedButton.classList.add('correct-choice');
+            resultStatus.textContent = '⭕ 正解！';
+            resultPanel.className = 'result-section correct-panel';
+        } else {
+            selectedButton.classList.add('wrong-choice');
+            resultStatus.textContent = '❌ 不正解...';
+            resultPanel.className = 'result-section wrong-panel';
+            
+            // 正解のボタンをハイライト
+            buttons.forEach(btn => {
+                if (btn.textContent.substring(0, 1).toUpperCase() === q.correct.toUpperCase()) {
+                    btn.classList.add('correct-choice');
+                }
+            });
+        }
+
+        evidenceTextEl.innerHTML = q.evidence;
+        resultPanel.style.display = 'block';
+    }
+
+    // 次の問題へ進む処理
+    nextButton.addEventListener('click', () => {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < questions.length) {
+            showQuestion();
+        } else {
+            showScore();
+        }
+    });
+
+    // スコア画面の表示
+    function showScore() {
+        progressFill.style.width = '100%';
+        gameArea.style.display = 'none';
+        scoreArea.style.display = 'block';
+        correctCountEl.textContent = score;
+
+        const rate = (score / questions.length) * 100;
+        let comment = '';
+        if (rate === 100) {
+            comment = '素晴らしい！完璧です！MMのDIマスターですね！';
+        } else if (rate >= 80) {
+            comment = '優秀な成績です！最新ガイドラインや臨床エビデンスがしっかり頭に入っています。';
+        } else if (rate >= 60) {
+            comment = '合格点です！間違えた箇所の解説（エビデンス）を復習しておきましょう。';
+        } else {
+            comment = 'もう一度解説を読み直して、再度チャレンジしてみましょう！';
+        }
+        scoreCommentEl.textContent = comment;
+    }
+
+    // もう一度遊ぶ
+    restartButton.addEventListener('click', initGame);
+
+    // 起動時にロード
+    window.addEventListener('DOMContentLoaded', loadQuestions);
+</script>
+
+</body>
+</html>

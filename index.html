@@ -181,7 +181,7 @@
     }
 
     /* ========================================== */
-    /* 2. クイズ画面用のスタイル                   */
+    /* 2. クイズ画面用のスタイル                  */
     /* ========================================== */
     .quiz-sub-header {
       display: flex;
@@ -365,12 +365,154 @@
       cursor: not-allowed;
       box-shadow: none;
     }
+
+    /* ========================================== */
+    /* 🔍 検索モーダル用の追加スタイル            */
+    /* ========================================== */
+    .search-trigger-container {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 15px;
+    }
+    .search-trigger-btn {
+      background-color: #475569;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 13px;
+      transition: background-color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .search-trigger-btn:hover {
+      background-color: #334155;
+    }
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 15px;
+    }
+    .modal-overlay.show {
+      display: flex;
+    }
+    .modal-content {
+      background-color: #ffffff;
+      width: 100%;
+      max-width: 640px;
+      height: 80vh;
+      border-radius: 24px;
+      padding: 25px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+      position: relative;
+      animation: modalFadeIn 0.25s ease-out;
+      border: 3px solid #eef2f5;
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .modal-close-btn {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      background: none;
+      border: none;
+      font-size: 28px;
+      cursor: pointer;
+      color: #94a3b8;
+      padding: 5px;
+      line-height: 1;
+    }
+    .modal-close-btn:hover {
+      color: #475569;
+    }
+    .modal-search-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      transition: border-color 0.2s;
+    }
+    .modal-search-input:focus {
+      border-color: #0ea5e9;
+      outline: none;
+    }
+    .modal-scroll-area {
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 5px;
+      margin-top: 10px;
+    }
+    .m-quiz-item {
+      background: #f8fafc;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 12px;
+      border: 1px solid #e2e8f0;
+      border-left: 5px solid #475569;
+    }
+    .m-quiz-item.kinqi {
+      border-left-color: #ef4444;
+      background: #fff5f5;
+    }
+    .m-quiz-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 12px;
+    }
+    .m-quiz-stage {
+      font-weight: bold;
+      color: #0ea5e9;
+    }
+    .m-quiz-correct {
+      font-weight: bold;
+      color: #22c55e;
+    }
+    .m-quiz-case {
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 10px;
+      font-weight: bold;
+      color: #1e293b;
+    }
+    .m-quiz-evidence {
+      font-size: 13px;
+      line-height: 1.6;
+      color: #475569;
+      background: #ffffff;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+    }
   </style>
 </head>
 <body>
 
 <div class="main-container">
   
+  <!-- 🔍 画面上部の検索起動ボタンエリア -->
+  <div class="search-trigger-container">
+    <button id="search-trigger" class="search-trigger-btn" onclick="openSearchModal()" style="display: none;">🔍 問題を検索・参照する</button>
+  </div>
+
   <div class="character-box">
     <div class="baymax">
       <div class="baymax-eyes"></div>
@@ -429,23 +571,47 @@
           ④ 多発性骨髄腫 （30問）
         </button>
       </li>
-      <!-- 🌟 追加：⑤ 皮膚感染症（100問）と腕・感染症のイラスト -->
       <li class="menu-item">
         <button class="menu-btn" onclick="startQuiz('skin_infections.json')">
           <span class="btn-icon">
             <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <!-- 前腕から手元にかけた皮膚・腕のなめらかなライン -->
               <path d="M2 17c4-1 7-3 11-3s6 2 9 3" stroke="#f4a261" stroke-width="2.5"/>
               <path d="M2 20c5-1 8-2 12-2s5 1 8 2" stroke="#e9c46a" stroke-width="1.5"/>
-              <!-- 皮膚上の感染症（バイ菌・トゲトゲのウイルスマーク） -->
-              <circle cx="12" cy="9" r="2.5" fill="#e76f51" stroke="#yd7316" stroke-width="1"/>
+              <circle cx="12" cy="9" r="2.5" fill="#e76f51" stroke="#d97406" stroke-width="1"/>
               <path d="M12 5.5v2M12 11v2M8.5 9h2M13.5 9h2M9.5 6.5l1.5 1.5M13 10l1.5 1.5M14.5 6.5L13 8M10.5 10L9 11.5" stroke="#ef4444" stroke-width="1.2"/>
-              <!-- 小さな菌の広がり -->
               <circle cx="6" cy="11" r="1" fill="#ef4444"/>
               <circle cx="17" cy="11" r="1" fill="#ef4444"/>
             </svg>
           </span>
           ⑤ 皮膚感染症 （100問）
+        </button>
+      </li>
+      <li class="menu-item">
+        <button class="menu-btn" onclick="startQuiz('bph.json')">
+          <span class="btn-icon">
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 8c0-3 3-5 6-5s6 2 6 5c0 3-2 5-6 6s-6-3-6-6z" fill="#ffedd5" stroke="#f97316" stroke-width="1.8"/>
+              <path d="M8 14c0-1.5 1.5-2.5 4-2.5s4 1 4 2.5c0 2-1.5 3-4 3s-4-1-4-3z" fill="#fecdd3" stroke="#e11d48" stroke-width="2"/>
+              <path d="M12 3v17" stroke="#38bdf8" stroke-width="2.5"/>
+            </svg>
+          </span>
+          ⑥ 前立腺肥大症 （100問）
+        </button>
+      </li>
+      <!-- 👁️ 新規追加：⑦ 緑内障・白内障 -->
+      <li class="menu-item">
+        <button class="menu-btn" onclick="startQuiz('glaucoma_cataract.json')">
+          <span class="btn-icon">
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <!-- 目の輪郭 -->
+              <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+              <!-- 虹彩（目玉） -->
+              <circle cx="12" cy="12" r="3" fill="#e0f2fe" stroke="#0ea5e9" stroke-width="1.5"/>
+              <!-- 瞳孔 -->
+              <circle cx="12" cy="12" r="1" fill="#0ea5e9"/>
+            </svg>
+          </span>
+          ⑦ 緑内障・白内障 （100問）
         </button>
       </li>
       <li class="menu-item">
@@ -494,6 +660,23 @@
 
 </div>
 
+<!-- 🌐 検索モーダル（ポップアップウィンドウ構造） -->
+<div id="searchModal" class="modal-overlay" onclick="closeSearchModalViaOverlay(event)">
+  <div class="modal-content">
+    <button class="modal-close-btn" onclick="closeSearchModal()">&times;</button>
+    <h3 style="margin-top:0; color:#df4736; border-bottom:2px solid #e2e8f0; padding-bottom:10px; font-size:18px; text-align:left;">📋 現在の領域から検索・参照</h3>
+    
+    <input type="text" id="modalSearchInput" class="modal-search-input" placeholder="問題番号、薬剤名、疾患キーワードで高速検索...">
+    <div style="font-size: 13px; color: #64748b; font-weight: bold; padding-left: 2px;">
+      該当件数: <span id="modalMatchCount" style="color:#0ea5e9;">0</span> / <span id="modalTotalCount">0</span> 問
+    </div>
+    
+    <div id="modalQuizList" class="modal-scroll-area">
+      <!-- 検索結果がここに動的生成されます -->
+    </div>
+  </div>
+</div>
+
 <script>
   let questions = [];
   let currentQuestionIndex = 0;
@@ -517,10 +700,12 @@
   const prevBtn = document.getElementById('prev-btn');
   const nextBtn = document.getElementById('next-btn');
   const favToggle = document.getElementById('favorite-toggle');
+  const searchTrigger = document.getElementById('search-trigger');
 
   function showMenu() {
     quizScreen.style.display = 'none';
     menuScreen.style.display = 'block';
+    searchTrigger.style.display = 'none'; // 目次では検索ボタンを隠す
     bearBalloon.textContent = "こんにちは、私はベイマックス。あなたの健康学習パートナーです。どの領域のクイズに挑戦しますか？";
   }
 
@@ -564,6 +749,7 @@
     
     menuScreen.style.display = 'none';
     quizScreen.style.display = 'block';
+    searchTrigger.style.display = 'flex'; // クイズ開始時に検索ボタンを表示
     loadQuestion();
   }
 
@@ -716,6 +902,74 @@
 
     localStorage.setItem('med_quiz_favorites', JSON.stringify(favorites));
   }
+
+  /* ========================================== */
+  /* 🔍 モーダル検索システム用 JavaScriptロジック  */
+  /* ========================================== */
+  function openSearchModal() {
+    document.getElementById('searchModal').classList.add('show');
+    document.getElementById('modalTotalCount').textContent = questions.length;
+    renderModalList(questions);
+    document.getElementById('modalSearchInput').focus();
+  }
+
+  function closeSearchModal() {
+    document.getElementById('searchModal').classList.remove('show');
+    document.getElementById('modalSearchInput').value = '';
+  }
+
+  function closeSearchModalViaOverlay(e) {
+    if (e.target.id === 'searchModal') {
+      closeSearchModal();
+    }
+  }
+
+  function renderModalList(items) {
+    const listContainer = document.getElementById('modalQuizList');
+    document.getElementById('modalMatchCount').textContent = items.length;
+    listContainer.innerHTML = '';
+
+    if (items.length === 0) {
+      listContainer.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:30px; font-weight:bold;">一致する問題が見つかりません。</div>';
+      return;
+    }
+
+    items.forEach(item => {
+      // 危険フラグ（禁忌・尿閉・ショック等）に、緑内障特有の危険ワードも少し反応しやすく設定可能
+      const isKinqi = item.case.includes('禁忌') || item.case.includes('尿閉') || item.case.includes('ショック');
+      const itemDiv = document.createElement('div');
+      itemDiv.className = `m-quiz-item ${isKinqi ? 'kinqi' : ''}`;
+
+      itemDiv.innerHTML = `
+        <div class="m-quiz-header">
+          <span class="m-quiz-stage">${item.stage || '実践問題'}</span>
+          <span class="m-quiz-correct">正解: ${item.correct}</span>
+        </div>
+        <div class="m-quiz-case">${item.case}</div>
+        <div class="m-quiz-evidence"><strong>【解説】</strong> ${item.evidence}</div>
+      `;
+      listContainer.appendChild(itemDiv);
+    });
+  }
+
+  // リアルタイムフィルタリング検索
+  document.getElementById('modalSearchInput').addEventListener('input', function(e) {
+    const keyword = e.target.value.toLowerCase().trim();
+
+    if (!keyword) {
+      renderModalList(questions);
+      return;
+    }
+
+    const filtered = questions.filter(item => {
+      const stageMatch = item.stage ? item.stage.toLowerCase().includes(keyword) : false;
+      return stageMatch || 
+             item.case.toLowerCase().includes(keyword) || 
+             item.evidence.toLowerCase().includes(keyword);
+    });
+
+    renderModalList(filtered);
+  });
 </script>
 </body>
 </html>
