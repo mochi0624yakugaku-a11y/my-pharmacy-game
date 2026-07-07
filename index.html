@@ -5,6 +5,16 @@
   <title>高度薬学クイズシステム - ケアスタイル</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    .m-quiz-start-btn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+.m-quiz-start-btn:hover { background: #2563eb; }
     /* ========================================== */
     /* 全体の優しい世界観を設定（ベイマックス風カラー） */
     /* ========================================== */
@@ -614,6 +624,35 @@
           ⑦ 緑内障・白内障 （100問）
         </button>
       </li>
+
+<li class="menu-item">
+  <button class="menu-btn" onclick="startQuiz('chronic_constipation.json')">
+    <span class="btn-icon">
+      <svg viewBox="0 0 24 24" width="32" height="32" fill="#78350f">
+        <path d="M12 4c-3.5 0-6 2.5-6 6 0 2.5 1.5 4.5 3 5.5-1 1-1.5 2.5-1.5 4 0 2 1.5 3.5 3.5 3.5s3.5-1.5 3.5-3.5c0-1.5-.5-3-1.5-4 1.5-1 3-3 3-5.5 0-3.5-2.5-6-6-6z"/>
+      </svg>
+    </span>
+    ⑧ 慢性便秘症 （100問）
+  </button>
+</li>
+
+<!-- ⑨ 関節リウマチ -->
+      <li class="menu-item">
+        <button class="menu-btn" onclick="startQuiz('rheumatoid_arthritis.json')">
+          <span class="btn-icon">
+            <!-- 骨（骨関節）をイメージしたSVG -->
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 9l-6 6M9 9l6 6" />
+              <circle cx="6" cy="6" r="2" fill="#e2e8f0" stroke="#64748b" />
+              <circle cx="18" cy="18" r="2" fill="#e2e8f0" stroke="#64748b" />
+              <line x1="7.5" y1="7.5" x2="10.5" y2="10.5" />
+              <line x1="13.5" y1="13.5" x2="16.5" y2="16.5" />
+            </svg>
+          </span>
+          ⑨ 関節リウマチ （100問）
+        </button>
+      </li>
+
       <li class="menu-item">
         <button class="menu-btn review-btn" onclick="startReviewMode()">
           <span class="btn-icon">
@@ -680,6 +719,7 @@
 <script>
   let questions = [];
   let currentQuestionIndex = 0;
+  let currentFileName = "";
   let score = 0;
   let isReviewMode = false;
   let answeredStatus = [];
@@ -705,94 +745,85 @@
   function showMenu() {
     quizScreen.style.display = 'none';
     menuScreen.style.display = 'block';
-    searchTrigger.style.display = 'none'; // 目次では検索ボタンを隠す
-    bearBalloon.textContent = "こんにちは、私はベイマックス。あなたの健康学習パートナーです。どの領域のクイズに挑戦しますか？";
+    searchTrigger.style.display = 'none';
+    bearBalloon.textContent = "こんにちは、私はベイマックス。どの領域のクイズに挑戦しますか？";
   }
 
   async function startQuiz(jsonFileName) {
     try {
       const response = await fetch(jsonFileName);
-      if (!response.ok) {
-        throw new Error(`ファイルが見つかりません: ${jsonFileName}`);
-      }
-      const rawQuestions = await response.json();
+      if (!response.ok) throw new Error(`ファイルが見つかりません`);
+      questions = await response.json();
+      currentFileName = jsonFileName;
       
-      questions = rawQuestions.map((q, index) => {
-        q.id = `${jsonFileName}_${index}`;
-        return q;
-      });
-
+      const savedIndex = localStorage.getItem(`progress_${currentFileName}`);
+      const savedStatus = localStorage.getItem(`status_${currentFileName}`);
+      
+      let startIdx = 0;
+      if (savedIndex !== null) {
+        if (confirm("前回の続きから再開しますか？")) {
+          startIdx = parseInt(savedIndex);
+          answeredStatus = JSON.parse(savedStatus) || new Array(questions.length).fill(null);
+        } else {
+          answeredStatus = new Array(questions.length).fill(null);
+        }
+      } else {
+        answeredStatus = new Array(questions.length).fill(null);
+      }
+      
       isReviewMode = false;
-      initQuizStatus();
+      initQuizStatus(startIdx);
     } catch (error) {
-      alert(`データの読み込みに失敗しました。\n${error.message}\n※ファイルが正しい場所に配置されているか確認してください。`);
+      alert(error.message);
     }
   }
 
-  function startReviewMode() {
-    const allFavIds = Object.keys(favorites).filter(key => favorites[key].isFav);
-    
-    if (allFavIds.length === 0) {
-      bearBalloon.textContent = "お気に入りに登録された問題が現在ありません。クイズ中に右上（★）を押して登録してください。";
-      return;
+  function initQuizStatus(startIndex = 0) {
+    let targetIndex = startIndex;
+    const savedStatus = JSON.parse(localStorage.getItem(`status_${currentFileName}`)) || [];
+    while (targetIndex < questions.length && savedStatus[targetIndex] !== null && savedStatus[targetIndex] !== undefined) {
+      targetIndex++;
     }
-
-    questions = allFavIds.map(key => favorites[key].data);
-    isReviewMode = true;
-    initQuizStatus();
-  }
-
-  function initQuizStatus() {
-    currentQuestionIndex = 0;
+    currentQuestionIndex = (targetIndex >= questions.length) ? questions.length - 1 : targetIndex;
     score = 0;
-    answeredStatus = new Array(questions.length).fill(null);
-    
     menuScreen.style.display = 'none';
     quizScreen.style.display = 'block';
-    searchTrigger.style.display = 'flex'; // クイズ開始時に検索ボタンを表示
+    searchTrigger.style.display = 'flex';
     loadQuestion();
   }
 
   function loadQuestion() {
+    localStorage.setItem(`progress_${currentFileName}`, currentQuestionIndex);
     feedbackContainer.classList.add('hidden');
     choicesContainer.innerHTML = '';
     
-    bearBalloon.textContent = isReviewMode 
-      ? "お気に入り問題の復習プロセスを実行中。最適な対応を選んでください。" 
-      : "この症例を分析しました。適切な対応を1つ選択してください。";
-
+    bearBalloon.textContent = "この症例を分析しました。適切な対応を1つ選択してください。";
     const currentQuestion = questions[currentQuestionIndex];
-    
     prevBtn.disabled = (currentQuestionIndex === 0);
     
-    if (favorites[currentQuestion.id] && favorites[currentQuestion.id].isFav) {
-      favToggle.classList.add('active');
-      favToggle.textContent = '★';
-    } else {
-      favToggle.classList.remove('active');
-      favToggle.textContent = '☆';
-    }
+    const savedAnswers = JSON.parse(localStorage.getItem(`status_${currentFileName}`)) || [];
+    answeredStatus = savedAnswers;
+    const currentAns = answeredStatus[currentQuestionIndex];
 
     stageTitle.textContent = currentQuestion.stage || "実践問題";
     progressText.textContent = `${currentQuestionIndex + 1} / ${questions.length}`;
-    const progressPercent = ((currentQuestionIndex + 1) / questions.length) * 100;
-    progressBar.style.width = `${progressPercent}%`;
-
+    progressBar.style.width = `${((currentQuestionIndex + 1) / questions.length) * 100}%`;
     caseText.textContent = currentQuestion.case;
 
     currentQuestion.choices.forEach(choice => {
       const button = document.createElement('button');
       button.className = 'choice-button';
       button.textContent = choice;
-      const choiceLetter = choice.trim().charAt(0);
-      
-      button.onclick = () => selectAnswer(choiceLetter, button);
+      button.onclick = () => selectAnswer(choice.trim().charAt(0), button);
       choicesContainer.appendChild(button);
     });
 
-    const previousAnswer = answeredStatus[currentQuestionIndex];
-    if (previousAnswer) {
-      restoreAnswer(previousAnswer);
+    if (currentAns) {
+      restoreAnswer(currentAns);
+      resultStatus.innerHTML = currentAns.isCorrect ? '<span style="color:green;">💮 正解</span>' : '<span style="color:red;">◆ 不正解</span>';
+      evidenceText.textContent = currentQuestion.evidence;
+      feedbackContainer.classList.remove('hidden');
+      nextBtn.disabled = false;
     } else {
       nextBtn.disabled = true;
     }
@@ -800,66 +831,32 @@
 
   function selectAnswer(selectedLetter, selectedButton) {
     const currentQuestion = questions[currentQuestionIndex];
-    const correctLetter = currentQuestion.correct;
-    const isCorrect = (selectedLetter === correctLetter);
-
-    answeredStatus[currentQuestionIndex] = {
-      selectedLetter: selectedLetter,
-      isCorrect: isCorrect
-    };
-
-    if (isCorrect) score++;
-    displayFeedback(isCorrect, selectedButton, correctLetter);
+    const isCorrect = (selectedLetter === currentQuestion.correct);
+    answeredStatus[currentQuestionIndex] = { selectedLetter, isCorrect };
+    localStorage.setItem(`status_${currentFileName}`, JSON.stringify(answeredStatus));
+    displayFeedback(isCorrect, selectedButton, currentQuestion.correct);
   }
 
   function displayFeedback(isCorrect, selectedButton, correctLetter) {
     const buttons = choicesContainer.querySelectorAll('.choice-button');
     buttons.forEach(btn => {
       btn.disabled = true;
-      const btnLetter = btn.textContent.trim().charAt(0);
-      if (btnLetter === correctLetter) {
-        btn.classList.add('correct-flash');
-      }
+      if (btn.textContent.trim().charAt(0) === correctLetter) btn.classList.add('correct-flash');
     });
-
-    if (isCorrect) {
-      bearBalloon.textContent = "痛みのレベルが下がりました。素晴らしい、大正解です。";
-      resultStatus.innerHTML = '<span style="color: #166534; font-size: 1.3em; font-weight: bold;">💮 正解 💮</span>';
-    } else {
-      if (selectedButton) selectedButton.classList.add('wrong-flash');
-      bearBalloon.textContent = "データが更新されました。解説を確認して、次に活かしましょう。";
-      resultStatus.innerHTML = '<span style="color: #991b1b; font-size: 1.3em; font-weight: bold;">◆ 不正解 ◆</span>';
-    }
-
+    if (!isCorrect && selectedButton) selectedButton.classList.add('wrong-flash');
+    resultStatus.innerHTML = isCorrect ? '<span style="color:green;">💮 正解</span>' : '<span style="color:red;">◆ 不正解</span>';
     evidenceText.textContent = questions[currentQuestionIndex].evidence;
     feedbackContainer.classList.remove('hidden');
     nextBtn.disabled = false;
   }
 
   function restoreAnswer(ans) {
-    const currentQuestion = questions[currentQuestionIndex];
-    let selectedBtn = null;
-
     const buttons = choicesContainer.querySelectorAll('.choice-button');
     buttons.forEach(btn => {
-      const btnLetter = btn.textContent.trim().charAt(0);
-      if (btnLetter === ans.selectedLetter) {
-        selectedBtn = btn;
-      }
+      btn.disabled = true;
+      if (btn.textContent.trim().charAt(0) === questions[currentQuestionIndex].correct) btn.classList.add('correct-flash');
+      if (btn.textContent.trim().charAt(0) === ans.selectedLetter && !ans.isCorrect) btn.classList.add('wrong-flash');
     });
-
-    displayFeedback(ans.isCorrect, selectedBtn, currentQuestion.correct);
-  }
-
-  function prevQuestion() {
-    if (currentQuestionIndex > 0) {
-      const currentAns = answeredStatus[currentQuestionIndex];
-      if (currentAns && currentAns.isCorrect) {
-        score--;
-      }
-      currentQuestionIndex--;
-      loadQuestion();
-    }
   }
 
   function nextQuestion() {
@@ -867,47 +864,30 @@
     if (currentQuestionIndex < questions.length) {
       loadQuestion();
     } else {
-      bearBalloon.textContent = "すべてのクイズが完了しました。私はケアに満足しました。🍵";
-      caseText.innerHTML = `
-        <div style="text-align: center; padding: 10px 0;">
-          <h3 style="color: #1e293b; margin-bottom: 10px;">すべての問題が終了しました！</h3>
-          <p style="font-size: 18px; color: #df4736; font-weight: bold;">あなたのスコア: ${score} / ${questions.length} 問中</p>
-        </div>
-      `;
-      choicesContainer.innerHTML = '';
-      feedbackContainer.classList.add('hidden');
-      nextBtn.disabled = true;
-      prevBtn.disabled = true;
+      localStorage.removeItem(`progress_${currentFileName}`);
+      bearBalloon.textContent = "全問完了です！";
     }
   }
 
-  function toggleFavorite() {
-    const currentQuestion = questions[currentQuestionIndex];
-    const id = currentQuestion.id;
-
-    if (favorites[id] && favorites[id].isFav) {
-      favorites[id].isFav = false;
-      favToggle.classList.remove('active');
-      favToggle.textContent = '☆';
-      bearBalloon.textContent = "この問題をお気に入りから削除しました。";
-    } else {
-      favorites[id] = {
-        isFav: true,
-        data: currentQuestion
-      };
-      favToggle.classList.add('active');
-      favToggle.textContent = '★';
-      bearBalloon.textContent = "この問題をお気に入りに登録しました。復習モードでいつでも解き直せます。";
+  function prevQuestion() {
+    if (currentQuestionIndex > 0) {
+      currentQuestionIndex--;
+      loadQuestion();
     }
-
-    localStorage.setItem('med_quiz_favorites', JSON.stringify(favorites));
   }
 
-  /* ========================================== */
-  /* 🔍 モーダル検索システム用 JavaScriptロジック  */
-  /* ========================================== */
+  function jumpToQuestion(index) {
+    closeSearchModal();
+    menuScreen.style.display = 'none';
+    quizScreen.style.display = 'block';
+    searchTrigger.style.display = 'flex';
+    currentQuestionIndex = index;
+    loadQuestion();
+  }
+
   function openSearchModal() {
-    document.getElementById('searchModal').classList.add('show');
+    const modal = document.getElementById('searchModal');
+    modal.classList.add('show');
     document.getElementById('modalTotalCount').textContent = questions.length;
     renderModalList(questions);
     document.getElementById('modalSearchInput').focus();
@@ -918,32 +898,22 @@
     document.getElementById('modalSearchInput').value = '';
   }
 
-  function closeSearchModalViaOverlay(e) {
-    if (e.target.id === 'searchModal') {
-      closeSearchModal();
-    }
-  }
-
   function renderModalList(items) {
     const listContainer = document.getElementById('modalQuizList');
     document.getElementById('modalMatchCount').textContent = items.length;
     listContainer.innerHTML = '';
-
     if (items.length === 0) {
       listContainer.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:30px; font-weight:bold;">一致する問題が見つかりません。</div>';
       return;
     }
-
-    items.forEach(item => {
-      // 危険フラグ（禁忌・尿閉・ショック等）に、緑内障特有の危険ワードも少し反応しやすく設定可能
+    items.forEach((item) => {
       const isKinqi = item.case.includes('禁忌') || item.case.includes('尿閉') || item.case.includes('ショック');
       const itemDiv = document.createElement('div');
       itemDiv.className = `m-quiz-item ${isKinqi ? 'kinqi' : ''}`;
-
       itemDiv.innerHTML = `
         <div class="m-quiz-header">
           <span class="m-quiz-stage">${item.stage || '実践問題'}</span>
-          <span class="m-quiz-correct">正解: ${item.correct}</span>
+          <button class="m-quiz-start-btn" onclick="jumpToQuestion(${questions.indexOf(item)})">この問題から解く</button>
         </div>
         <div class="m-quiz-case">${item.case}</div>
         <div class="m-quiz-evidence"><strong>【解説】</strong> ${item.evidence}</div>
@@ -952,22 +922,13 @@
     });
   }
 
-  // リアルタイムフィルタリング検索
   document.getElementById('modalSearchInput').addEventListener('input', function(e) {
     const keyword = e.target.value.toLowerCase().trim();
-
-    if (!keyword) {
-      renderModalList(questions);
-      return;
-    }
-
+    if (!keyword) { renderModalList(questions); return; }
     const filtered = questions.filter(item => {
       const stageMatch = item.stage ? item.stage.toLowerCase().includes(keyword) : false;
-      return stageMatch || 
-             item.case.toLowerCase().includes(keyword) || 
-             item.evidence.toLowerCase().includes(keyword);
+      return stageMatch || item.case.toLowerCase().includes(keyword) || item.evidence.toLowerCase().includes(keyword);
     });
-
     renderModalList(filtered);
   });
 </script>
