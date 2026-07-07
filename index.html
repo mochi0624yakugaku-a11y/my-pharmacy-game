@@ -33,15 +33,16 @@
       color: #333333;
     }
     .main-container {
-      background-color: #ffffff;
-      width: 100%;
-      max-width: 580px;
-      padding: 30px;
-      border-radius: 24px;
-      box-shadow: 0 8px 24px rgba(140, 150, 160, 0.12);
-      border: 3px solid #eef2f5;
-      position: relative;
-    }
+    background-color: #ffffff;
+    width: 95%; /* スマホでは画面幅の95%に設定 */
+    max-width: 580px; /* PCでは580px以上大きくしない */
+    margin: 10px auto; /* 上下10px、左右中央揃え */
+    padding: 20px; /* 少しパディングを抑える */
+    border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border: 1px solid #eef2f5; /* 枠線を少し細く */
+    position: relative;
+  }
     h1, h2 {
       font-size: 22px;
       color: #df4736; /* ベイマックスのアクセントレッド */
@@ -512,6 +513,50 @@
       border-radius: 10px;
       border: 1px solid #e2e8f0;
     }
+    /* モバイルでのボタンやテキストのはみ出し防止 */
+  .choice-button {
+    width: 100%; /* 横幅いっぱいに広げる */
+    padding: 15px; /* スマホでも押しやすいサイズ */
+    font-size: 14px; /* 少し小さくして折り返しやすく */
+  }
+
+  .nav-buttons {
+    flex-direction: column; /* スマホでは縦並びにする */
+    gap: 8px;
+  }
+  .modal-content {
+    width: 95%; /* 画面幅の95% */
+    height: 90vh; /* 画面高さの90% */
+    padding: 15px;
+  }
+  /* --- スマホ表示の最適化（はみ出し防止） --- */
+  @media screen and (max-width: 600px) {
+    .main-container {
+      width: 95% !important;
+      padding: 15px !important;
+    }
+    
+    /* 文字列が長くて枠を突き破るのを防ぐ */
+    .case-box, .m-quiz-case, .m-quiz-evidence, #evidence-text {
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      word-break: break-all;
+    }
+
+    /* ボタンの調整 */
+    .choice-button {
+      width: 100%;
+      white-space: normal; /* 長いテキストも自動改行 */
+      font-size: 14px;
+      padding: 12px;
+    }
+
+    /* ナビボタンを縦並びに */
+    .nav-buttons {
+      flex-direction: column;
+      gap: 10px;
+    }
+  }
   </style>
 </head>
 <body>
@@ -1020,6 +1065,7 @@
     loadQuestion();
     closeSearchModal();
   }
+
 </script>
 </body>
 </html>
