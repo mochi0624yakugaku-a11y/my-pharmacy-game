@@ -792,7 +792,14 @@
     loadQuestion();
   }
 
-  function loadQuestion() {
+  function loadQuestion() {const currentKey = `${currentFileName}_${currentQuestionIndex}`;
+  if (favorites[currentKey]) {
+    favToggle.textContent = "★"; // お気に入り済みなら塗りつぶし
+    favToggle.style.color = "#fbbf24";
+  } else {
+    favToggle.textContent = "☆"; // 未登録なら枠線
+    favToggle.style.color = "#94a3b8";
+  }
     localStorage.setItem(`progress_${currentFileName}`, currentQuestionIndex);
     feedbackContainer.classList.add('hidden');
     choicesContainer.innerHTML = '';
@@ -931,6 +938,88 @@
     });
     renderModalList(filtered);
   });
+  // --- ここから追加 ---
+  favToggle.addEventListener('click', () => {
+    const currentKey = `${currentFileName}_${currentQuestionIndex}`;
+    
+    if (favorites[currentKey]) {
+      // お気に入りを解除
+      delete favorites[currentKey];
+      favToggle.textContent = "☆";
+      favToggle.style.color = "#94a3b8";
+    } else {
+      // お気に入りに追加
+      favorites[currentKey] = {
+        fileName: currentFileName,
+        index: currentQuestionIndex,
+        case: questions[currentQuestionIndex].case
+      };
+      favToggle.textContent = "★";
+      favToggle.style.color = "#fbbf24";
+    }
+    
+    // localStorageに保存
+    localStorage.setItem('med_quiz_favorites', JSON.stringify(favorites));
+  });
+  // --- ここまで追加 ---
+  // --- お気に入り復習機能の追加 ---
+  async function startReviewMode() {
+    const favData = JSON.parse(localStorage.getItem('med_quiz_favorites'));
+    if (!favData || Object.keys(favData).length === 0) {
+      alert("お気に入りに登録された問題がありません。");
+      return;
+    }
+
+    // お気に入りから質問リストを構築
+    const favoriteKeys = Object.keys(favData);
+    
+    // 一つのJSONファイルだけでなく、複数のファイルにまたがる可能性があるため、
+    // まず必要なデータを各ファイルから取得する処理が必要ですが、
+    // 今回は簡易的に「お気に入りデータ内の各問題」をリストとして扱います
+    
+    // 復習用のダミー的な配列を作成
+    questions = favoriteKeys.map(key => ({
+      ...favData[key],
+      // 実際にはここでお気に入り時のデータを復元
+      // 注意: questionsが別ファイルの場合、本来は再fetchが必要ですが、
+      // 簡易版として、保存した情報をもとにします
+    }));
+
+    // 本来は各JSONファイルを再読み込みして全データと照合すべきですが、
+    // 構造を維持するため、現在の実装を活かします
+    alert("お気に入り問題の復習を開始します。該当の疾患領域から解き直してください。");
+    // ※今回は複雑化を避けるため、各JSONのIDに基づいた再読み込みは省略し、
+    // 登録された個別の問題にジャンプする仕組みがベストです。
+    
+    renderReviewList(favData);
+  }
+
+  function renderReviewList(favData) {
+    const modal = document.getElementById('searchModal');
+    const listContainer = document.getElementById('modalQuizList');
+    
+    modal.classList.add('show');
+    listContainer.innerHTML = '<h3>⭐ お気に入り問題一覧</h3>';
+    
+    Object.keys(favData).forEach(key => {
+      const item = favData[key];
+      const itemDiv = document.createElement('div');
+      itemDiv.className = 'm-quiz-item';
+      itemDiv.innerHTML = `
+        <div class="m-quiz-case">${item.case}</div>
+        <button class="m-quiz-start-btn" onclick="loadFavoriteAndStart('${item.fileName}', ${item.index})">この問題を解く</button>
+      `;
+      listContainer.appendChild(itemDiv);
+    });
+  }
+
+  // お気に入りから特定のファイルを読み込んで開始する関数
+  async function loadFavoriteAndStart(fileName, index) {
+    await startQuiz(fileName);
+    currentQuestionIndex = index;
+    loadQuestion();
+    closeSearchModal();
+  }
 </script>
 </body>
 </html>
