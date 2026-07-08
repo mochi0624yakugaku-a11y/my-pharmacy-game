@@ -5,6 +5,24 @@
   <title>高度薬学クイズシステム - ケアスタイル</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+  /* 全要素に強制適用：はみ出しを禁止する */
+  * {
+    box-sizing: border-box !important;
+    max-width: 100% !important;
+    word-break: break-all !important;
+  }
+  
+  body {
+    overflow-x: hidden; /* 横スクロールを物理的に禁止する */
+  }
+  
+  /* コンテナをスマホに最適化 */
+  .main-container {
+    width: 95vw !important; /* ビューポート幅の95%に固定 */
+    padding: 15px !important;
+    margin: 10px auto !important;
+  }
+  ...
     .m-quiz-start-btn {
   background: #3b82f6;
   color: white;
