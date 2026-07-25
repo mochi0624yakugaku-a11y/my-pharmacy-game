@@ -999,15 +999,22 @@
       choicesContainer.appendChild(button);
     });
 
-    if (currentAns) {
-      restoreAnswer(currentAns);
-      resultStatus.innerHTML = currentAns.isCorrect ? '<span style="color:green;">💮 正解</span>' : '<span style="color:red;">◆ 不正解</span>';
-      evidenceText.textContent = currentQuestion.evidence;
-      feedbackContainer.classList.remove('hidden');
-      nextBtn.disabled = false;
-    } else {
-      nextBtn.disabled = true;
-    }
+   // --- 修正・追加：loadQuestion関数内の解説と画像の処理 ---
+// （既存の loadQuestion 内の該当部分を書き換えてください）
+
+  if (currentAns) {
+    restoreAnswer(currentAns);
+    resultStatus.innerHTML = currentAns.isCorrect ? '<span style="color:green;">💮 正解</span>' : '<span style="color:red;">◆ 不正解</span>';
+    evidenceText.textContent = currentQuestion.evidence;
+    
+    // 【追加】解説用画像の表示処理
+    showExplanationImage(currentQuestion.image);
+
+    feedbackContainer.classList.remove('hidden');
+    nextBtn.disabled = false;
+  } else {
+    nextBtn.disabled = true;
+  }
   }
 
   function selectAnswer(selectedLetter, selectedButton) {
@@ -1027,6 +1034,10 @@
     if (!isCorrect && selectedButton) selectedButton.classList.add('wrong-flash');
     resultStatus.innerHTML = isCorrect ? '<span style="color:green;">💮 正解</span>' : '<span style="color:red;">◆ 不正解</span>';
     evidenceText.textContent = questions[currentQuestionIndex].evidence;
+    
+    // 【追加】解説用画像の表示処理
+    showExplanationImage(questions[currentQuestionIndex].image);
+
     feedbackContainer.classList.remove('hidden');
     nextBtn.disabled = false;
   }
@@ -1079,7 +1090,7 @@
     document.getElementById('modalSearchInput').value = '';
   }
 
-  function renderModalList(items) {
+function renderModalList(items) {
     const listContainer = document.getElementById('modalQuizList');
     document.getElementById('modalMatchCount').textContent = items.length;
     listContainer.innerHTML = '';
@@ -1091,6 +1102,8 @@
       const isKinqi = item.case.includes('禁忌') || item.case.includes('尿閉') || item.case.includes('ショック');
       const itemDiv = document.createElement('div');
       itemDiv.className = `m-quiz-item ${isKinqi ? 'kinqi' : ''}`;
+      
+      // ▼ ここを修正：不要な表示や誤作動を防ぐシンプルな構造にします
       itemDiv.innerHTML = `
         <div class="m-quiz-header">
           <span class="m-quiz-stage">${item.stage || '実践問題'}</span>
@@ -1098,6 +1111,7 @@
         </div>
         <div class="m-quiz-case">${item.case}</div>
         <div class="m-quiz-evidence"><strong>【解説】</strong> ${item.evidence}</div>
+        ${item.image ? `<div style="margin-top:10px; text-align:center;"><img src="${item.image}" style="max-width:100%; height:auto; border-radius:6px;"></div>` : ''}
       `;
       listContainer.appendChild(itemDiv);
     });
@@ -1194,6 +1208,28 @@
     loadQuestion();
     closeSearchModal();
   }
+  // --- 追加：解説用画像を制御する関数 ---
+function showExplanationImage(imageSrc) {
+  // すでに画像表示用のエリアがあれば取得、なければ作成する
+  let imgContainer = document.getElementById('explanationImageContainer');
+  if (!imgContainer) {
+    imgContainer = document.createElement('div');
+    imgContainer.id = 'explanationImageContainer';
+    imgContainer.style.marginTop = '15px';
+    imgContainer.style.textAlign = 'center';
+    // evidenceText の直後（または feedbackContainer 内）に挿入
+    evidenceText.parentNode.insertBefore(imgContainer, evidenceText.nextSibling);
+  }
+
+  // 画像パスが設定されている場合のみ表示
+  if (imageSrc) {
+    imgContainer.innerHTML = `<img src="${imageSrc}" alt="解説画像" style="max-width: 100%; height: auto; border-radius: 8px; border: 1px solid #cbd5e1;">`;
+    imgContainer.style.display = 'block';
+  } else {
+    imgContainer.innerHTML = '';
+    imgContainer.style.display = 'none';
+  }
+}
 
 </script>
 </body>
