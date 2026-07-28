@@ -1208,25 +1208,42 @@ function renderModalList(items) {
     loadQuestion();
     closeSearchModal();
   }
-  // --- 追加：解説用画像を制御する関数 ---
-function showExplanationImage(imageSrc) {
-  // すでに画像表示用のエリアがあれば取得、なければ作成する
+// --- 修正：解説用画像を1枚または複数（最大2枚など）制御する関数 ---
+function showExplanationImage(imageData) {
   let imgContainer = document.getElementById('explanationImageContainer');
   if (!imgContainer) {
     imgContainer = document.createElement('div');
     imgContainer.id = 'explanationImageContainer';
     imgContainer.style.marginTop = '15px';
     imgContainer.style.textAlign = 'center';
-    // evidenceText の直後（または feedbackContainer 内）に挿入
+    imgContainer.style.display = 'flex';
+    imgContainer.style.flexDirection = 'column'; // 縦に並べる場合
+    imgContainer.style.gap = '10px';
     evidenceText.parentNode.insertBefore(imgContainer, evidenceText.nextSibling);
   }
 
-  // 画像パスが設定されている場合のみ表示
-  if (imageSrc) {
-    imgContainer.innerHTML = `<img src="${imageSrc}" alt="解説画像" style="max-width: 100%; height: auto; border-radius: 8px; border: 1px solid #cbd5e1;">`;
+  // 中身を一旦リセット
+  imgContainer.innerHTML = '';
+
+  if (!imageData) {
+    imgContainer.style.display = 'none';
+    return;
+  }
+
+  // 配列（複数）の場合、または文字列（単数）の場合を判別して処理
+  let imagesArray = Array.isArray(imageData) ? imageData : [imageData];
+
+  let htmlContent = '';
+  imagesArray.forEach((imgSrc, index) => {
+    if (imgSrc) {
+      htmlContent += `<img src="${imgSrc}" alt="解説画像${index + 1}" style="max-width: 100%; height: auto; border-radius: 8px; border: 1px solid #cbd5e1; display: block; margin: 0 auto;">`;
+    }
+  });
+
+  if (htmlContent) {
+    imgContainer.innerHTML = htmlContent;
     imgContainer.style.display = 'block';
   } else {
-    imgContainer.innerHTML = '';
     imgContainer.style.display = 'none';
   }
 }
