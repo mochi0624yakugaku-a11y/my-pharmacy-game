@@ -588,6 +588,12 @@
       gap: 10px;
     }
   }
+  /* 📝 メモ機能のスマホ対応微調整 */
+    #quiz-memo-input:focus {
+      border-color: #ec4899;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.15);
+    }
   </style>
 </head>
 <body>
@@ -915,6 +921,17 @@
       <div id="evidence-text"></div>
     </div>
 
+    <!-- 📝 各問題ごとの自分用メモ機能エリア -->
+    <div id="quiz-memo-container" style="margin-bottom: 20px; padding: 15px; background: #fdf2f8; border: 1px solid #fbcfe8; border-radius: 14px;">
+      <label for="quiz-memo-input" style="display: block; font-weight: bold; margin-bottom: 6px; color: #be185d; font-size: 13px;">
+        📝 この問題のメモ・自分用まとめ（自動保存）
+      </label>
+      <textarea id="quiz-memo-input" placeholder="ここに覚え書きやポイントを自由に入力できます..." style="width: 100%; height: 75px; padding: 10px; border: 1px solid #cbd5e1; border-radius: 10px; resize: vertical; box-sizing: border-box; font-size: 14px; font-family: inherit;"></textarea>
+      <div style="text-align: right; margin-top: 4px;">
+        <span id="memo-save-status" style="font-size: 11px; color: #15803d; font-weight: bold; display: none;">✓ 保存しました</span>
+      </div>
+    </div>
+
     <div class="button-group">
       <div class="nav-buttons">
         <button id="prev-btn" class="action-btn prev-button" onclick="prevQuestion()">⬅ 1つ前へ</button>
@@ -1051,7 +1068,7 @@
       button.onclick = () => selectAnswer(choice.trim().charAt(0), button);
       choicesContainer.appendChild(button);
     });
-
+loadMemoForCurrentQuestion();
    // --- 修正・追加：loadQuestion関数内の解説と画像の処理 ---
 // （既存の loadQuestion 内の該当部分を書き換えてください）
 
@@ -1299,19 +1316,37 @@ function showExplanationImage(imageData) {
   } else {
     imgContainer.style.display = 'none';
   }
-  <div style="margin-top: 25px; padding: 15px; background: #fdf2f8; border: 1px solid #fbcfe8; border-radius: 8px;">
-        <label for="quiz-memo-input" style="display: block; font-weight: bold; margin-bottom: 5px; color: #be185d; font-size: 0.9rem;">
-          📝 この問題のメモ・自分用まとめ（自動保存）
-        </label>
-        <textarea id="quiz-memo-input" placeholder="ここに覚え書きやポイントを自由に入力できます..." style="width: 100%; height: 70px; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; resize: vertical; box-sizing: border-box;"></textarea>
-        <div style="text-align: right; margin-top: 5px;">
-          <span id="memo-save-status" style="font-size: 0.8rem; color: #15803d; font-weight: bold; display: none;">✓ 保存しました</span>
-        </div>
-      </div>
-    </div>
-  </section>
+  
 }
+// 📝 どの問題・どのJSONファイルか判定してメモを読み込み・自動保存する関数
+function loadMemoForCurrentQuestion() {
+  const memoInput = document.getElementById('quiz-memo-input');
+  const saveStatus = document.getElementById('memo-save-status');
+  if (!memoInput) return;
 
+  // 表示時に「保存しました」表示は消しておく
+  if (saveStatus) saveStatus.style.display = 'none';
+
+  // どのJSONファイルか（currentFileName）と、何問目か（currentQuestionIndex）を組み合わせた一意のキー
+  const memoKey = `med_quiz_memo_${currentFileName || 'default'}_q${currentQuestionIndex}`;
+
+  // 保存されているメモがあれば復元、なければ空欄
+  memoInput.value = localStorage.getItem(memoKey) || '';
+
+  // 入力するたびに自動でlocalStorageに保存
+  memoInput.oninput = () => {
+    localStorage.setItem(memoKey, memoInput.value);
+    
+    // 小さく「✓ 保存しました」を表示してすぐ消す演出
+    if (saveStatus) {
+      saveStatus.style.display = 'inline';
+      clearTimeout(window.memoSaveTimer);
+      window.memoSaveTimer = setTimeout(() => {
+        saveStatus.style.display = 'none';
+      }, 1200);
+    }
+  };
+}
 </script>
 </body>
 </html>
