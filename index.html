@@ -853,6 +853,32 @@
           ⑱ 診療報酬 （100問）
         </button>
       </li>
+<li class="menu-item">
+        <button class="menu-btn" onclick="startQuiz('cosme_level1_100_questions.json')">
+          <span class="btn-icon">
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#ec4899" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <!-- 化粧品・スキンケアボトルをイメージしたピンク系のアイコン -->
+              <path d="M9 4h6v3H9z" stroke="#ec4899"/>
+              <rect x="6" y="7" width="12" height="14" rx="2" stroke="#ec4899"/>
+              <path d="M10 12h4" stroke="#ec4899" stroke-width="1.5"/>
+            </svg>
+          </span>
+          ⑲ 化粧品検定1級 ⓵（100問）
+        </button>
+      </li> 
+<li class="menu-item">
+        <button class="menu-btn" onclick="startQuiz('cosme_level2_100_questions.json')">
+          <span class="btn-icon">
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#db2777" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <!-- 第2弾をイメージしたピンク・ローズ系のボトル＆星アイコン -->
+              <path d="M9 4h6v3H9z" stroke="#db2777"/>
+              <rect x="6" y="7" width="12" height="14" rx="2" stroke="#db2777"/>
+              <path d="M12 11l1 2 2 1-2 1-1 2-1-2-2-1 2-1z" fill="#db2777" stroke="none"/>
+            </svg>
+          </span>
+          ⑳ 化粧品検定1級 ⓶ （100問）
+        </button>
+      </li>  
 
       <li class="menu-item">
         <button class="menu-btn review-btn" onclick="startReviewMode()">
@@ -1273,6 +1299,17 @@ function showExplanationImage(imageData) {
   } else {
     imgContainer.style.display = 'none';
   }
+  <div style="margin-top: 25px; padding: 15px; background: #fdf2f8; border: 1px solid #fbcfe8; border-radius: 8px;">
+        <label for="quiz-memo-input" style="display: block; font-weight: bold; margin-bottom: 5px; color: #be185d; font-size: 0.9rem;">
+          📝 この問題のメモ・自分用まとめ（自動保存）
+        </label>
+        <textarea id="quiz-memo-input" placeholder="ここに覚え書きやポイントを自由に入力できます..." style="width: 100%; height: 70px; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; resize: vertical; box-sizing: border-box;"></textarea>
+        <div style="text-align: right; margin-top: 5px;">
+          <span id="memo-save-status" style="font-size: 0.8rem; color: #15803d; font-weight: bold; display: none;">✓ 保存しました</span>
+        </div>
+      </div>
+    </div>
+  </section>
 }
 
 </script>
