@@ -348,7 +348,7 @@
     ],
     "correct": "A",
     "evidence": "【解説】ミルクやクリームタイプは油分によるクレンジング力を持ちながら肌への刺激が少なく、乾燥肌に適しています。",
-    "image": ["cleansing_milk.png"]
+    "image": ["cleansing_oil.png"]
   },
   {
     "stage": "Q28：洗顔料の仕組み",
@@ -361,7 +361,7 @@
     ],
     "correct": "A",
     "evidence": "【解説】洗顔は、余分な皮脂や酸化した汚れ、不要な角質を落として肌のターンオーバーを正常に整えるために行います。",
-    "image": ["facial_cleansing.png"]
+    "image": ["facial_cleansing.png","facial_cleansing3.png","facial_cleansing2.png"]
   },
   {
     "stage": "Q29：化粧水の役割",
