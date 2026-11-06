@@ -387,7 +387,7 @@
     ],
     "correct": "A",
     "evidence": "【解説】乳液やクリームは、油分によるエモリエント効果で肌の水分蒸散を防ぎ、柔らかくしっとりした状態を保ちます。",
-    "image": ["cream_emollient.png"]
+    "image": ["cream_emollient.png","cream_emollient2.png"]
   },
   {
     "stage": "Q31〜Q100：検定頻出テーマ（基礎～応用）",
